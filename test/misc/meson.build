@@ -18,3 +18,10 @@ object_signal = executable(
     dependencies: libwayfire,
     install: false)
 test('Object and signal test', object_signal)
+
+nonstd_test = executable(
+    'nonstd_test',
+    'nonstd-test.cpp',
+    dependencies: [doctest, libwayfire],
+    install: false)
+test('Nonstd utilities test', nonstd_test)
