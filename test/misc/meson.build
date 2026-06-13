@@ -32,3 +32,10 @@ variant_test = executable(
     dependencies: [doctest, libwayfire],
     install: false)
 test('Variant utilities test', variant_test)
+
+lexer_test = executable(
+    'lexer_test',
+    'lexer-test.cpp',
+    dependencies: [doctest, libwayfire],
+    install: false)
+test('Lexer utilities test', lexer_test)
