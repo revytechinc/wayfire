@@ -53,3 +53,10 @@ wf_action_test = executable(
     dependencies: [doctest, libwayfire],
     install: false)
 test('Wayfire action utilities test', wf_action_test)
+
+rule_test = executable(
+    'rule_test',
+    'rule-test.cpp',
+    dependencies: [doctest, libwayfire],
+    install: false)
+test('Rule utilities test', rule_test)
