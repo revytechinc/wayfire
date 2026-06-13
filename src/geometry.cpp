@@ -214,7 +214,7 @@ wf::geometry_t wf::scale_box(
     int x  = (int)std::floor(scaled_fbox.x);
     int y  = (int)std::floor(scaled_fbox.y);
     int x2 = (int)std::ceil(scaled_fbox.x + scaled_fbox.width);
-    int y2 = (int)std::floor(scaled_fbox.y + scaled_fbox.height);
+    int y2 = (int)std::ceil(scaled_fbox.y + scaled_fbox.height);
 
     return wf::geometry_t{
         .x     = x,
