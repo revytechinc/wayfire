@@ -39,3 +39,10 @@ lexer_test = executable(
     dependencies: [doctest, libwayfire],
     install: false)
 test('Lexer utilities test', lexer_test)
+
+condition_test = executable(
+    'condition_test',
+    'condition-test.cpp',
+    dependencies: [doctest, libwayfire],
+    install: false)
+test('Condition utilities test', condition_test)
