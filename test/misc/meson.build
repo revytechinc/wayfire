@@ -25,3 +25,10 @@ nonstd_test = executable(
     dependencies: [doctest, libwayfire],
     install: false)
 test('Nonstd utilities test', nonstd_test)
+
+variant_test = executable(
+    'variant_test',
+    'variant-test.cpp',
+    dependencies: [doctest, libwayfire],
+    install: false)
+test('Variant utilities test', variant_test)
