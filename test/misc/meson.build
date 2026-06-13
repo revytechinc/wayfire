@@ -46,3 +46,10 @@ condition_test = executable(
     dependencies: [doctest, libwayfire],
     install: false)
 test('Condition utilities test', condition_test)
+
+wf_action_test = executable(
+    'wf_action_test',
+    'action-test.cpp',
+    dependencies: [doctest, libwayfire],
+    install: false)
+test('Wayfire action utilities test', wf_action_test)
