@@ -3,10 +3,12 @@
 
 #include <wayfire/nonstd/observer_ptr.h>
 #include <wayfire/nonstd/reverse.hpp>
+#include <wayfire/utils.hpp>
 
 #include <vector>
 #include <memory>
 #include <array>
+#include <set>
 
 TEST_CASE("observer_ptr default construction")
 {
@@ -232,4 +234,92 @@ TEST_CASE("reverse with array")
     REQUIRE(result[0] == 30);
     REQUIRE(result[1] == 20);
     REQUIRE(result[2] == 10);
+}
+
+// Test utility functions
+TEST_CASE("contains with vector")
+{
+    std::vector<int> v = {1, 2, 3, 4, 5};
+    REQUIRE(wf::contains(v, 3));
+    REQUIRE(wf::contains(v, 1));
+    REQUIRE(wf::contains(v, 5));
+    REQUIRE_FALSE(wf::contains(v, 0));
+    REQUIRE_FALSE(wf::contains(v, 6));
+}
+
+TEST_CASE("contains with string")
+{
+    std::string s = "hello world";
+    REQUIRE(wf::contains(s, 'h'));
+    REQUIRE(wf::contains(s, 'o'));
+    REQUIRE(wf::contains(s, 'l'));
+    REQUIRE_FALSE(wf::contains(s, 'x'));
+}
+
+TEST_CASE("contains with set")
+{
+    std::set<std::string> s = {"apple", "banana", "cherry"};
+    REQUIRE(wf::contains(s, "banana"));
+    REQUIRE_FALSE(wf::contains(s, "orange"));
+}
+
+TEST_CASE("ltrim")
+{
+    std::string s1 = "   hello";
+    wf::ltrim(s1);
+    REQUIRE(s1 == "hello");
+
+    std::string s2 = "\t\n  world";
+    wf::ltrim(s2);
+    REQUIRE(s2 == "world");
+
+    std::string s3 = "no trim";
+    wf::ltrim(s3);
+    REQUIRE(s3 == "no trim");
+
+    std::string s4 = "   ";
+    wf::ltrim(s4);
+    REQUIRE(s4.empty());
+}
+
+TEST_CASE("rtrim")
+{
+    std::string s1 = "hello   ";
+    wf::rtrim(s1);
+    REQUIRE(s1 == "hello");
+
+    std::string s2 = "world\t\n  ";
+    wf::rtrim(s2);
+    REQUIRE(s2 == "world");
+
+    std::string s3 = "no trim";
+    wf::rtrim(s3);
+    REQUIRE(s3 == "no trim");
+
+    std::string s4 = "   ";
+    wf::rtrim(s4);
+    REQUIRE(s4.empty());
+}
+
+TEST_CASE("trim")
+{
+    std::string s1 = "   hello   ";
+    wf::trim(s1);
+    REQUIRE(s1 == "hello");
+
+    std::string s2 = "\t\n  world\t\n  ";
+    wf::trim(s2);
+    REQUIRE(s2 == "world");
+
+    std::string s3 = "no trim";
+    wf::trim(s3);
+    REQUIRE(s3 == "no trim");
+
+    std::string s4 = "   ";
+    wf::trim(s4);
+    REQUIRE(s4.empty());
+
+    std::string s5 = "";
+    wf::trim(s5);
+    REQUIRE(s5.empty());
 }
