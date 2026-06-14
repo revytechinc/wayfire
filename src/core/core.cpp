@@ -880,6 +880,10 @@ void wf::compositor_core_impl_t::deallocate_core()
 
 wf::compositor_core_impl_t& wf::compositor_core_impl_t::get()
 {
+    if (!static_core)
+    {
+        throw std::runtime_error("Core not initialized");
+    }
     return *static_core;
 }
 
@@ -890,5 +894,10 @@ wf_runtime_config runtime_config;
 
 std::shared_ptr<wf::config::option_base_t> wf::detail::load_raw_option(const std::string& name)
 {
-    return wf::get_core().config->get_option(name);
+    auto *cfg = wf::get_core().config.get();
+    if (!cfg)
+    {
+        return nullptr;
+    }
+    return cfg->get_option(name);
 }

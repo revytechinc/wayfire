@@ -392,9 +392,6 @@ int main(int argc, char *argv[])
     parse_extended_debugging(extended_debug_categories);
     wlr_log_init(WLR_DEBUG, wlr_log_handler);
 
-    // Initialize structured JSONL logger
-    wf::wf_logger_instance().init();
-
 #ifdef PRINT_TRACE
     /* In case of crash, print the stacktrace for debugging.
      * However, if ASAN is enabled, we'll get better stacktrace from there. */
@@ -418,6 +415,7 @@ int main(int argc, char *argv[])
      * wf objects (which depend on safe-list) can work */
     auto display = wl_display_create();
     auto& core   = wf::compositor_core_impl_t::allocate_core();
+    wf::wf_logger_instance().init();
 
     core.argc = argc;
     core.argv = argv;

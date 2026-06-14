@@ -2,6 +2,7 @@
 #include <wayfire/nonstd/json.hpp>
 #include <wayfire/util/log.hpp>
 #include <wayfire/option-wrapper.hpp>
+#include <wayfire/config/option.hpp>
 #include <fstream>
 #include <sstream>
 #include <iomanip>
@@ -152,51 +153,54 @@ std::string wf::wf_logger_t::get_summary_filename(const std::string& date) const
     return "wayfire-" + date + "-summary.jsonl";
 }
 
-void wf::wf_logger_t::load_config()
+static bool option_exists(const std::string& name)
 {
     try
     {
-        enabled = option_wrapper_t<bool>("core/log_file_enabled").value();
+        return bool{wf::detail::load_raw_option(name)};
     }
     catch (...)
+    {
+        return false;
+    }
+}
+
+void wf::wf_logger_t::load_config()
+{
+    auto *cfg = wf::get_core().config.get();
+    if (!cfg)
     {
         enabled = false;
+        return;
     }
 
-    try
-    {
+    if (option_exists("core/log_file_enabled"))
+        enabled = option_wrapper_t<bool>("core/log_file_enabled").value();
+    else
+        enabled = false;
+
+    if (option_exists("core/log_max_size_mb"))
         max_size_mb = option_wrapper_t<int>("core/log_max_size_mb").value();
-    }
-    catch (...)
-    {
+    else
         max_size_mb = 10;
-    }
 
-    try
-    {
+    if (option_exists("core/log_retention_days"))
         retention_days = option_wrapper_t<int>("core/log_retention_days").value();
-    }
-    catch (...)
-    {
+    else
         retention_days = 7;
-    }
 
-    try
-    {
+    if (option_exists("core/log_summary_enabled"))
         summary_enabled = option_wrapper_t<bool>("core/log_summary_enabled").value();
-    }
-    catch (...)
-    {
+    else
         summary_enabled = true;
-    }
 
-    try
+    if (option_exists("core/log_directory"))
     {
         log_dir = option_wrapper_t<std::string>("core/log_directory").value();
         std::string base = wf_get_data_home();
         log_dir = join_path(base, log_dir);
     }
-    catch (...)
+    else
     {
         log_dir = join_path(wf_get_data_home(), "wayfire/logs");
     }
