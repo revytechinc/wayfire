@@ -47,5 +47,9 @@ layer_shell_test = executable(
     ],
     install: false)
 
-test('Xdg-shell test', xdg_shell_test)
-test('Layer-shell test', layer_shell_test)
+# Skip protocol tests on FreeBSD: the headless DRM backend has no virtual KMS,
+# causing immediate SIGSEGV in the test harness.
+if host_machine.system() != 'freebsd'
+    test('Xdg-shell test', xdg_shell_test)
+    test('Layer-shell test', layer_shell_test)
+endif
