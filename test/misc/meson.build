@@ -60,3 +60,5 @@ rule_test = executable(
     dependencies: [doctest, libwayfire],
     install: false)
 test('Rule utilities test', rule_test)
+
+subdir('platform')

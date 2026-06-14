@@ -17,7 +17,8 @@ cpp = meson.get_compiler('cpp')
 
 # FreeBSD does not have linux/input-event-codes.h; use compat shim
 if host_machine.system() == 'freebsd'
-	add_project_arguments('-I' + meson.current_source_dir() + '/compat', language: ['cpp', 'c'])
+	compat_path = meson.current_source_dir() + '/compat'
+	add_project_arguments('-I' + compat_path, language: ['cpp', 'c'])
 endif
 
 version = '"@0@"'.format(meson.project_version())
