@@ -296,6 +296,21 @@
 				<_long>Overrides the system default `XCursor` size.</_long>
 				<default>24</default>
 			</option>
+			<option name="cursor_recovery_timeout" type="int">
+				<_short>Cursor recovery timeout (ms)</_short>
+				<_long>If the cursor is hidden for longer than this timeout, attempt automatic recovery. Set to 0 to disable automatic recovery.</_long>
+				<default>3000</default>
+			</option>
+			<option name="cursor_recovery_key" type="activator">
+				<_short>Cursor recovery key</_short>
+				<_long>Key binding to manually recover the cursor when it disappears.</_long>
+				<default>&lt;super&gt; KEY_C</default>
+			</option>
+			<option name="cursor_recovery_sanity_limit" type="int">
+				<_short>Cursor sanity check limit</_short>
+				<_long>If the hide reference counter exceeds this value, force reset. This detects stuck hidden state from bugs.</_long>
+				<default>10</default>
+			</option>
 		</group>
 	</plugin>
 </wayfire>

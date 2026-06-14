@@ -32,6 +32,17 @@ struct cursor_t
     int hide_ref_counter = 0;
 
     /**
+     * Force unhide the cursor, ignoring ref counter.
+     * Used for recovery when cursor gets stuck hidden.
+     */
+    void force_unhide_cursor();
+
+    /**
+     * Check if cursor is currently hidden (visible = false) or not.
+     */
+    bool is_hidden() const;
+
+    /**
      * Delay setting the cursor, in order to avoid setting the cursor
      * multiple times in a single frame and to avoid setting it in the middle
      * of the repaint loop (not allowed by wlroots).
@@ -50,6 +61,7 @@ struct cursor_t
 
     void init_xcursor();
     void init_cursor_shape_manager();
+    void init_cursor_recovery();
     void setup_listeners();
 
     // Device event listeners
@@ -77,7 +89,21 @@ struct cursor_t
     std::string last_cursor_name;
 
     bool touchscreen_mode_active = false;
+
+    // Cursor recovery system
+    bool touchscreen_mode_intended = false;  // Was touchscreen mode intentionally activated?
+    int64_t hide_timestamp_ms = 0;         // When cursor was hidden (for watchdog)
+    wf::wl_timer<false> cursor_recovery_timer;
+    wf::option_wrapper_t<int> recovery_timeout{"input/cursor_recovery_timeout"};
+    wf::option_wrapper_t<activatorbinding_t> recovery_key{"input/cursor_recovery_key"};
+    wf::option_wrapper_t<int> sanity_limit{"input/cursor_recovery_sanity_limit"};
+    wf::activator_callback recovery_binding;
+
+    // Internal recovery methods
+    void check_cursor_recovery();
+    void perform_cursor_recovery(const std::string& reason);
 };
-}
+
+} // namespace wf
 
 #endif /* end of include guard: CURSOR_HPP */
