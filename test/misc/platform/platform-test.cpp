@@ -29,13 +29,13 @@ TEST_CASE("wlr_platform_name returns a non-empty string")
 
 TEST_CASE("wlr_platform returns non-null")
 {
-    const struct wlr_platform *plat = wlr_platform();
+    const struct wlr_platform_t *plat = wlr_platform();
     REQUIRE(plat != nullptr);
 }
 
 TEST_CASE("wlr_platform name matches wlr_platform_name")
 {
-    const struct wlr_platform *plat = wlr_platform();
+    const struct wlr_platform_t *plat = wlr_platform();
     REQUIRE(std::strcmp(plat->name, wlr_platform_name()) == 0);
 }
 
@@ -43,13 +43,13 @@ TEST_CASE("wlr_platform name matches wlr_platform_name")
 
 TEST_CASE("clock vtable is non-null")
 {
-    const struct wlr_platform *plat = wlr_platform();
+    const struct wlr_platform_t *plat = wlr_platform();
     REQUIRE(plat->clock != nullptr);
 }
 
 TEST_CASE("clock->get_time is non-null and returns valid timespec")
 {
-    const struct wlr_platform *plat = wlr_platform();
+    const struct wlr_platform_t *plat = wlr_platform();
     REQUIRE(plat->clock->get_time != nullptr);
 
     struct timespec ts = {0};
@@ -63,7 +63,7 @@ TEST_CASE("clock->get_time is non-null and returns valid timespec")
 
 TEST_CASE("clock->get_time is monotonic between calls")
 {
-    const struct wlr_platform *plat = wlr_platform();
+    const struct wlr_platform_t *plat = wlr_platform();
     struct timespec ts1 = {0}, ts2 = {0};
 
     plat->clock->get_time(&ts1);
@@ -78,31 +78,31 @@ TEST_CASE("clock->get_time is monotonic between calls")
 
 TEST_CASE("unix_socket vtable is non-null on all supported platforms")
 {
-    const struct wlr_platform *plat = wlr_platform();
+    const struct wlr_platform_t *plat = wlr_platform();
     REQUIRE(plat->unix_socket != nullptr);
 }
 
 TEST_CASE("unix_socket->format_socket_path is non-null")
 {
-    const struct wlr_platform *plat = wlr_platform();
+    const struct wlr_platform_t *plat = wlr_platform();
     REQUIRE(plat->unix_socket->format_socket_path != nullptr);
 }
 
 TEST_CASE("unix_socket->socket_dir is non-null")
 {
-    const struct wlr_platform *plat = wlr_platform();
+    const struct wlr_platform_t *plat = wlr_platform();
     REQUIRE(plat->unix_socket->socket_dir != nullptr);
 }
 
 TEST_CASE("unix_socket->lock_fmt is non-null")
 {
-    const struct wlr_platform *plat = wlr_platform();
+    const struct wlr_platform_t *plat = wlr_platform();
     REQUIRE(plat->unix_socket->lock_fmt != nullptr);
 }
 
 TEST_CASE("unix_socket->unlink_display_socket is non-null")
 {
-    const struct wlr_platform *plat = wlr_platform();
+    const struct wlr_platform_t *plat = wlr_platform();
     REQUIRE(plat->unix_socket->unlink_display_socket != nullptr);
 }
 
@@ -110,7 +110,7 @@ TEST_CASE("unix_socket->unlink_display_socket is non-null")
 
 TEST_CASE("format_socket_path produces a non-empty, null-terminated string")
 {
-    const struct wlr_platform *plat = wlr_platform();
+    const struct wlr_platform_t *plat = wlr_platform();
     char buf[256];
     int len = plat->unix_socket->format_socket_path(buf, sizeof(buf), 42);
     REQUIRE(len > 0);
@@ -119,7 +119,7 @@ TEST_CASE("format_socket_path produces a non-empty, null-terminated string")
 
 TEST_CASE("socket_dir returns a non-empty string")
 {
-    const struct wlr_platform *plat = wlr_platform();
+    const struct wlr_platform_t *plat = wlr_platform();
     const char *dir = plat->unix_socket->socket_dir();
     REQUIRE(dir != nullptr);
     REQUIRE(std::strlen(dir) > 0);
