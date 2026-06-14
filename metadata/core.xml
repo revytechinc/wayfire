@@ -98,5 +98,59 @@
 			<_long>Calls the shutdown routines for wayfire.</_long>
 			<default>&lt;ctrl&gt; &lt;alt&gt; KEY_BACKSPACE</default>
 		</option>
+		<!-- Logging configuration -->
+		<group>
+			<_short>Logging</_short>
+			<_long>Configure structured logging to file.</_long>
+			<option name="log_file_enabled" type="bool">
+				<_short>Enable file logging</_short>
+				<_long>Write structured JSONL logs to a file in the log directory.</_long>
+				<default>false</default>
+			</option>
+			<option name="log_directory" type="string">
+				<_short>Log directory</_short>
+				<_long>Directory to store log files, relative to XDG_DATA_HOME (default: ~/.local/share).</_long>
+				<default>wayfire/logs</default>
+			</option>
+			<option name="log_max_size_mb" type="int">
+				<_short>Max log file size (MB)</_short>
+				<_long>Rotate log file when it reaches this size. Set to 0 for daily rotation only.</_long>
+				<default>10</default>
+				<min>0</min>
+				<max>1024</max>
+			</option>
+			<option name="log_retention_days" type="int">
+				<_short>Log retention (days)</_short>
+				<_long>Delete log files older than this many days. Set to 0 to keep forever.</_long>
+				<default>7</default>
+				<min>0</min>
+			</option>
+			<option name="log_min_level" type="string">
+				<_short>Minimum log level</_short>
+				<_long>Only log events at or above this level to the structured log file.</_long>
+				<default>INFO</default>
+				<desc>
+					<value>DEBUG</value>
+					<_name>Debug</_name>
+				</desc>
+				<desc>
+					<value>INFO</value>
+					<_name>Info</_name>
+				</desc>
+				<desc>
+					<value>WARN</value>
+					<_name>Warning</_name>
+				</desc>
+				<desc>
+					<value>ERROR</value>
+					<_name>Error</_name>
+				</desc>
+			</option>
+			<option name="log_summary_enabled" type="bool">
+				<_short>Enable daily summary</_short>
+				<_long>Write a summary of event counts by reason each day.</_long>
+				<default>true</default>
+			</option>
+		</group>
 	</plugin>
 </wayfire>

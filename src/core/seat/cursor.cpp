@@ -1,4 +1,7 @@
 #include "cursor.hpp"
+#include "core/logger.hpp"
+
+#define COMPONENT "core/seat"
 #include "pointer.hpp"
 #include "../core-impl.hpp"
 #include "../../view/view-impl.hpp"
@@ -199,7 +202,8 @@ void wf::cursor_t::set_cursor(std::string name)
 
 void wf::cursor_t::force_unhide_cursor()
 {
-    LOGW("Cursor recovery: forcing cursor to become visible");
+    WF_LOG_EVT(wf::log::LOG_LEVEL_WARN, "cursor_unhide_forced",
+        "forcing cursor to become visible");
     hide_ref_counter = 0;
     touchscreen_mode_active = false;
     touchscreen_mode_intended = false;
@@ -289,8 +293,9 @@ void wf::cursor_t::set_touchscreen_mode(bool enabled)
             cursor_recovery_timer.disconnect();
             cursor_recovery_timer.set_timeout(recovery_timeout, [this] ()
             {
-                LOGW("Cursor recovery: watchdog timer fired. touchscreen_mode_intended=",
-                    touchscreen_mode_intended, " touchscreen_mode_active=", touchscreen_mode_active);
+                WF_LOG_EVT(wf::log::LOG_LEVEL_WARN, "watchdog_timer_fired",
+                    "touchscreen_mode_intended=", touchscreen_mode_intended,
+                    " touchscreen_mode_active=", touchscreen_mode_active);
                 check_cursor_recovery();
             });
         }
@@ -311,13 +316,14 @@ void wf::cursor_t::init_cursor_recovery()
     // Recovery option 3: Key binding to manually recover cursor
     recovery_binding = [=] (auto)
     {
-        LOGW("Cursor recovery key pressed");
+        WF_LOG_EVT(wf::log::LOG_LEVEL_INFO, "recovery_key_pressed",
+            "manual cursor recovery triggered");
         perform_cursor_recovery("manual key binding");
         return true;
     };
 
     wf::get_core().bindings->add_activator(recovery_key, &recovery_binding);
-    LOGI("Cursor recovery system initialized.");
+    WF_LOG_EVT(wf::log::LOG_LEVEL_INFO, "recovery_init", "Cursor recovery system initialized.");
 }
 
 /**
@@ -334,7 +340,8 @@ void wf::cursor_t::check_cursor_recovery()
     // Recovery option 4: Sanity check - reset if ref counter is suspiciously high
     if (hide_ref_counter > sanity_limit)
     {
-        LOGW("Cursor recovery: sanity check failed! hide_ref_counter=", hide_ref_counter,
+        WF_LOG_EVT(wf::log::LOG_LEVEL_WARN, "sanity_check_failed",
+            "hide_ref_counter=", hide_ref_counter,
             " exceeds limit=", (int)sanity_limit);
         perform_cursor_recovery("sanity check: ref counter overflow");
         return;
@@ -348,7 +355,8 @@ void wf::cursor_t::check_cursor_recovery()
         {
             // Cursor has been hidden intentionally but for too long
             // This could indicate a bug where touchscreen mode didn't deactivate properly
-            LOGW("Cursor recovery: cursor hidden for ", elapsed, "ms (timeout: ", (int)recovery_timeout, "ms)",
+            WF_LOG_EVT(wf::log::LOG_LEVEL_WARN, "recovery_timeout",
+                "cursor hidden for ", elapsed, "ms (timeout: ", (int)recovery_timeout, "ms)",
                 " - touchscreen mode was intended but may be stuck");
             // Don't auto-recover if it was intentional, but log it
             // The user can use the recovery key if needed
@@ -359,7 +367,8 @@ void wf::cursor_t::check_cursor_recovery()
     // This handles cases where touchscreen_mode_intended was never set
     if (touchscreen_mode_active && !touchscreen_mode_intended)
     {
-        LOGW("Cursor recovery: touchscreen mode active but not intended, recovering");
+        WF_LOG_EVT(wf::log::LOG_LEVEL_WARN, "touchscreen_mode_unintended",
+            "touchscreen mode active but not intended, recovering");
         perform_cursor_recovery("touchscreen mode unintended");
         return;
     }
@@ -370,7 +379,8 @@ void wf::cursor_t::check_cursor_recovery()
         int64_t elapsed = wf::get_current_time() - hide_timestamp_ms;
         if (elapsed > recovery_timeout * 5)
         {
-            LOGW("Cursor recovery: cursor hidden for excessive time (", elapsed, "ms), forcing recovery");
+            WF_LOG_EVT(wf::log::LOG_LEVEL_WARN, "excessive_hide_time",
+                "cursor hidden for excessive time (", elapsed, "ms), forcing recovery");
             perform_cursor_recovery("excessive hide time");
             return;
         }
@@ -382,13 +392,14 @@ void wf::cursor_t::check_cursor_recovery()
  */
 void wf::cursor_t::perform_cursor_recovery(const std::string& reason)
 {
-    LOGW("CURSOR RECOVERY: ", reason);
-    LOGW("  Before: hide_ref_counter=", hide_ref_counter,
+    WF_LOG_EVT(wf::log::LOG_LEVEL_WARN, "cursor_recovery", reason,
+        " before: hide_ref_counter=", hide_ref_counter,
         " touchscreen_mode_active=", touchscreen_mode_active,
         " touchscreen_mode_intended=", touchscreen_mode_intended);
 
     force_unhide_cursor();
 
-    LOGW("  After: hide_ref_counter=", hide_ref_counter,
+    WF_LOG_EVT(wf::log::LOG_LEVEL_DEBUG, "cursor_recovery_after", reason,
+        " after: hide_ref_counter=", hide_ref_counter,
         " touchscreen_mode_active=", touchscreen_mode_active);
 }

@@ -63,7 +63,8 @@ wayfire_sources = ['geometry.cpp',
                    'output/workarea.cpp',
                    'output/render-manager.cpp',
                    'output/workspace-stream.cpp',
-                   'output/workspace-impl.cpp']
+                   'output/workspace-impl.cpp',
+                   'core/logger.cpp']
 
 json_flags = json.partial_dependency(compile_args: true, includes: true, link_args: true)
 wayfire_dependencies = [wayland_server, wlroots, xkbcommon, libinput,
@@ -136,7 +137,7 @@ tests_include_dirs = include_directories('.')
 
 # Generate main executable
 executable('wayfire', ['main.cpp', git_commit_info, git_branch_info],
-    dependencies: libwayfire,
+    dependencies: [libwayfire],
     install: true,
     cpp_args: debug_arguments)
 

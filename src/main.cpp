@@ -1,5 +1,7 @@
 #include <cstdlib>
 #include <cstring>
+#include <cctype>
+#include <algorithm>
 #include <iostream>
 #include <getopt.h>
 #include <signal.h>
@@ -13,6 +15,7 @@
 
 #include "core/opengl-priv.hpp"
 #include "wayfire/config-backend.hpp"
+#include "core/logger.hpp"
 #include "core/plugin-loader.hpp"
 #include "core/core-impl.hpp"
 #include <wayfire/nonstd/wlroots.hpp>
@@ -389,6 +392,9 @@ int main(int argc, char *argv[])
     parse_extended_debugging(extended_debug_categories);
     wlr_log_init(WLR_DEBUG, wlr_log_handler);
 
+    // Initialize structured JSONL logger
+    wf::wf_logger_instance().init();
+
 #ifdef PRINT_TRACE
     /* In case of crash, print the stacktrace for debugging.
      * However, if ASAN is enabled, we'll get better stacktrace from there. */
@@ -521,6 +527,7 @@ int main(int argc, char *argv[])
     }
 
     wf::compositor_core_impl_t::deallocate_core();
+    wf::wf_logger_instance().shutdown();
     LOGI("Shutdown successful!");
     return EXIT_SUCCESS;
 }
