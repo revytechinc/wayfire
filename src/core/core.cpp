@@ -142,6 +142,8 @@ void wf::compositor_core_impl_t::init()
     /* Somehow GTK requires the tablet_v2 to be advertised pretty early */
     protocols.tablet_v2 = wlr_tablet_v2_create(display);
     input = std::make_unique<wf::input_manager_t>();
+    // bindings must be created before seat (cursor calls bindings->add_activator in its constructor)
+    bindings = std::make_unique<bindings_repository_t>();
     seat  = std::make_unique<wf::seat_t>(display, "default");
 
     protocols.screencopy = wlr_screencopy_manager_v1_create(display);
@@ -283,7 +285,6 @@ void wf::compositor_core_impl_t::init()
              "wp_color_management_v1 will not be available.");
     }
 
-    this->bindings = std::make_unique<bindings_repository_t>();
     image_io::init();
     if (is_gles2())
     {
