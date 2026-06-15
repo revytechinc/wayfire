@@ -430,7 +430,7 @@ int main(int argc, char *argv[])
     if (drm_device)
     {
         drm_fd = open(drm_device, O_RDWR | O_CLOEXEC);
-    } else
+    } else if (core.backend)
     {
         drm_fd = wlr_backend_get_drm_fd(core.backend);
     }
