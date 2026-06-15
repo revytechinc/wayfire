@@ -454,6 +454,13 @@ int main(int argc, char *argv[])
     core.renderer = wlr_renderer_autocreate(core.backend);
     // core.renderer = wlr_pixman_renderer_create();
     // core.renderer = wlr_gles2_renderer_create_with_drm_fd(drm_fd);
+    // drm_fd is no longer needed — renderer opened its own via wlr_backend_get_drm_fd
+    if (drm_fd >= 0)
+    {
+        close(drm_fd);
+        drm_fd = -1;
+    }
+
     if (!core.renderer)
     {
         LOGE("Failed to create renderer");
