@@ -64,5 +64,15 @@ build/**
 
 .cache/**
 
+### FreeBSD port build artifacts ###
+coverage/
+gcov.core
+llvm-cov.core
++MANIFEST
++COMPACT_MANIFEST
+
+### Compat (FreeBSD shims) ###
+compat/
+
 # End of https://www.toptal.com/developers/gitignore/api/c++,meson,ninja,linux
 .aider*
