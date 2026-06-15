@@ -13,6 +13,11 @@
 
 #include <wayland-server.h>
 
+/* FreeBSD: detect render-node GPU for hybrid-GPU compatibility */
+#if defined(__FreeBSD__)
+#include <linux/drm-detect.h>
+#endif
+
 #include "core/opengl-priv.hpp"
 #include "wayfire/config-backend.hpp"
 #include "core/logger.hpp"
@@ -423,6 +428,21 @@ int main(int argc, char *argv[])
     /** TODO: move this to core_impl constructor */
     core.display = display;
     core.ev_loop = wl_display_get_event_loop(core.display);
+
+    /* FreeBSD: if only one GPU has a render node, restrict wlroots to it.
+     * This avoids multi-GPU DMA buffer sharing failures on hybrid-graphics
+     * laptops (e.g. Intel iGPU + NVIDIA dGPU). */
+    if (!getenv("WLR_DRM_DEVICES"))
+    {
+        char *gpu_path = wf_freebsd_detect_render_gpu();
+        if (gpu_path && gpu_path[0] != '\0')
+        {
+            LOGD("FreeBSD: restricting to GPU with render node: ", gpu_path);
+            setenv("WLR_DRM_DEVICES", gpu_path, 0);
+        }
+        free(gpu_path);
+    }
+
     core.backend = wlr_backend_autocreate(core.ev_loop, &core.session);
 
     int drm_fd = -1;
