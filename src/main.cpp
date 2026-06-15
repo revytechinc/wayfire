@@ -463,7 +463,13 @@ int main(int argc, char *argv[])
     }
 
     core.allocator = wlr_allocator_autocreate(core.backend, core.renderer);
-    assert(core.allocator);
+    if (!core.allocator)
+    {
+        LOGE("Failed to create allocator");
+        wl_display_destroy_clients(core.display);
+        wl_display_destroy(core.display);
+        return EXIT_FAILURE;
+    }
 
     if (core.is_gles2())
     {
