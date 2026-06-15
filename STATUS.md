@@ -9,10 +9,11 @@
 
 | Commit | Description |
 |--------|-------------|
+| `3d95067` | main: close leaked drm_fd after renderer creation |
+| `1589017` | main: avoid crash when wlr_allocator_autocreate returns null |
 | `81b8a33` | main: avoid segfault when wlr_backend_autocreate returns null |
 | `dfcf0f4` | core: fix init order crash — create bindings before seat |
 | `6c1e895` | core/logger: fix early init crash, handle missing config gracefully |
-| `d55960d` | submodules: sync index to current working tree SHAs |
 | `541286b` | test/platform: fix clock timespec test for FreeBSD CLOCK_MONOTONIC |
 | `975610a` | submodules/wlroots: point to fix meson.build after project() |
 | `50871b1` | submodules: point to new commits with git remote setup in meson.build |
@@ -93,6 +94,7 @@ Enterprise-class pre-launch validation. See prior session analysis for full gap 
 - `insert-compat.sh`: idempotent guard prevents duplicate FreeBSD compat blocks
 - compat shim: `compat/linux/input-event-codes.h` for Linux kernel header
 - `fix-include.sh`: patches `option-wrapper.hpp` for missing `section.hpp` include
+- Resource leak fixed: `drm_fd` opened at main.cpp:432 is now closed after renderer creation
 
 ### wayfire-plugins-extra
 - WRKSRC: `${WRKDIR}/wayfire-plugins-extra-0.11.0`
@@ -102,6 +104,7 @@ Enterprise-class pre-launch validation. See prior session analysis for full gap 
 - WRKSRC: `${WRKDIR}/wf-shell-v0.11.0`
 - PAM and xdg paths patched via `fix-pam-xdg-paths.py` → `${PREFIX}/etc/`
 - gbm/libdrm made optional for stream-chooser
+- Debug output added to `WfMenuItem::on_click()` and `WfLauncherButton::launch()` to diagnose app launch failures on FreeBSD (commit `2c0f565`)
 
 ---
 
