@@ -1,40 +1,56 @@
 /*
  * FreeBSD GPU detection implementation.
  *
- * Scans /dev/dri/ for render node minor numbers and matches them against
- * available card devices. If exactly one GPU has a render node, returns its
- * card path so WLR_DRM_DEVICES can be set to restrict wlroots to that GPU.
+ * Scans /dev/dri/ for render nodes, tests GBM allocation on each.
+ * Only GPUs where GBM works are considered "usable". If exactly one GPU
+ * works, returns its card path so WLR_DRM_DEVICES can be set to restrict
+ * wlroots to that GPU, avoiding multi-GPU DMA buffer sharing failures.
  *
- * On Linux, GPUs with render nodes have device minors 128+n where n is the
- * card minor. FreeBSD follows the same convention.
+ * On hybrid-graphics FreeBSD laptops (e.g. Intel iGPU + NVIDIA dGPU),
+ * both GPUs may expose render nodes, but only NVIDIA's GBM works for
+ * rendering. Testing GBM allocation distinguishes usable from unusable GPUs.
  */
 
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
 #include <dirent.h>
+#include <fcntl.h>
 #include <sys/stat.h>
 #include <unistd.h>
 
-/*
- * Check if a render node (by minor number) maps to a known card device.
- * On FreeBSD, render node minor N maps to card device drm/N-128 if that exists.
- *
- * Returns true if a corresponding card device exists.
- */
-static bool card_exists_for_render_minor(int render_minor)
-{
-    char path[64];
-    int card_minor = render_minor - 128; /* Linux/FreeBSD convention: renderN = card(N-128) */
+#include <gbm.h>
 
-    if (card_minor < 0)
+/*
+ * Test whether GBM can allocate a buffer on a render node.
+ * Returns true if a minimal GBM bo can be created (GPU is usable for rendering).
+ */
+static bool gbm_works(const char *render_path)
+{
+    int fd = open(render_path, O_RDWR | O_CLOEXEC);
+    if (fd < 0)
     {
         return false;
     }
 
-    snprintf(path, sizeof(path), "/dev/dri/card%d", card_minor);
-    struct stat st;
-    return stat(path, &st) == 0;
+    struct gbm_device *gbm = gbm_create_device(fd);
+    if (!gbm)
+    {
+        close(fd);
+        return false;
+    }
+
+    /* Try to allocate the smallest possible buffer — if this fails, GBM is broken */
+    struct gbm_bo *bo = gbm_bo_create(gbm, 64, 64,
+        GBM_FORMAT_XRGB8888, GBM_BO_USE_SCANOUT);
+    if (bo)
+    {
+        gbm_bo_destroy(bo);
+    }
+
+    gbm_device_destroy(gbm);
+    close(fd);
+    return bo != NULL;
 }
 
 char *wf_freebsd_detect_render_gpu(void)
@@ -60,24 +76,39 @@ char *wf_freebsd_detect_render_gpu(void)
         int render_minor = atoi(entry->d_name + 8);
         if (render_minor == 0 && strcmp(entry->d_name + 8, "0") != 0)
         {
-            /* Not a valid number, skip */
+            /* Not a valid number */
             continue;
         }
 
-        if (!card_exists_for_render_minor(render_minor))
+        int card_minor = render_minor - 128;
+        if (card_minor < 0)
         {
-            /* No corresponding card device */
+            continue;
+        }
+
+        char render_path[64];
+        snprintf(render_path, sizeof(render_path), "/dev/dri/%s", entry->d_name);
+
+        /* Skip GPUs where GBM allocation fails — not usable for rendering */
+        if (!gbm_works(render_path))
+        {
+            continue;
+        }
+
+        char card_path[64];
+        snprintf(card_path, sizeof(card_path), "/dev/dri/card%d", card_minor);
+        struct stat st;
+        if (stat(card_path, &st) != 0)
+        {
             continue;
         }
 
         if (usable_count >= 8)
         {
-            break; /* Too many, don't bother */
+            break;
         }
 
-        int card_minor = render_minor - 128;
-        snprintf(usable_cards[usable_count], sizeof(usable_cards[0]),
-            "/dev/dri/card%d", card_minor);
+        snprintf(usable_cards[usable_count], sizeof(usable_cards[0]), "%s", card_path);
         usable_count++;
     }
 
@@ -85,15 +116,15 @@ char *wf_freebsd_detect_render_gpu(void)
 
     if (usable_count == 0)
     {
-        return NULL; /* No GPUs with render nodes */
+        return NULL; /* No GPUs with working GBM */
     }
 
     if (usable_count == 1)
     {
-        /* Exactly one GPU with render node — return it for WLR_DRM_DEVICES */
+        /* Exactly one GPU with working GBM — return it for WLR_DRM_DEVICES */
         return strdup(usable_cards[0]);
     }
 
-    /* Multiple GPUs have render nodes — no filtering needed */
+    /* Multiple GPUs have working GBM — no filtering (user's choice) */
     return strdup("");
 }

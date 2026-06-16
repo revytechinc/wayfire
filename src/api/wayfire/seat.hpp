@@ -112,6 +112,13 @@ class seat_t
     void refocus();
 
     /**
+     * Clear pointer focus without triggering a scenegraph search.
+     * Use this when a node that holds pointer focus is being destroyed and
+     * the scenegraph has already been updated (so refocus would find the wrong node).
+     */
+    void clear_pointer_focus();
+
+    /**
      * Focus the given output. The currently focused output is used to determine
      * which plugins receive various events (including bindings)
      */

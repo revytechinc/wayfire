@@ -87,6 +87,12 @@ class pointer_t
      */
     void transfer_grab(scene::node_ptr node);
 
+    /**
+     * Set the pointer focus directly, sending leave/enter events.
+     * Use clear_pointer_focus() on the seat instead of calling this directly.
+     */
+    void update_cursor_focus(wf::scene::node_ptr node);
+
   private:
     nonstd::observer_ptr<wf::input_manager_t> input;
     nonstd::observer_ptr<seat_t> seat;
@@ -111,11 +117,6 @@ class pointer_t
     bool focus_enabled() const;
 
     void send_enter_to_focus();
-
-    /**
-     * Set the pointer focus.
-     */
-    void update_cursor_focus(wf::scene::node_ptr node);
 
     /** Number of currently-pressed mouse buttons */
     int count_pressed_buttons = 0;

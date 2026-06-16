@@ -122,6 +122,12 @@ class lock_surface_node : public lock_base_node<wf::scene::floating_inner_node_t
         wf::scene::damage_node(shared_from_this(), get_bounding_box());
         wf::wlr_surface_controller_t::try_free_controller(this->lock_surface->surface);
         wf::scene::remove_child(shared_from_this());
+        // Clear pointer focus explicitly — keyboard focus is cleared via the interaction
+        // destructor, but pointer focus lives on as a dangling reference to the removed node.
+        // Without this, motion/button events silently fail because the seat still holds the
+        // stale pointer to the destroyed node, which find_node_at skips (it's out of the
+        // scenegraph), leaving cursor_focus non-null but invalid.
+        wf::get_core().seat->clear_pointer_focus();
         this->interaction = std::make_unique<wf::keyboard_interaction_t>();
         const char *name = (this->output && this->output->handle) ? this->output->handle->name : "(deleted)";
         LOGC(LSHELL, "lock_surface on ", name, " destroyed");

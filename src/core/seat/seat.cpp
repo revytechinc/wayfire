@@ -221,6 +221,11 @@ void wf::seat_t::refocus()
     priv->set_keyboard_focus(focus_sptr, keyboard_focus_reason::REFOCUS);
 }
 
+void wf::seat_t::clear_pointer_focus()
+{
+    priv->lpointer->update_cursor_focus(nullptr);
+}
+
 uint32_t wf::seat_t::get_keyboard_modifiers()
 {
     return priv->get_modifiers();
