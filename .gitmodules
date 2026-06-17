@@ -1,15 +1,15 @@
 [submodule "subprojects/wf-config"]
 	path = subprojects/wf-config
-	url = git@github.com:revytechinc/wf-config.git
+	url = https://github.com/revytechinc/wf-config.git
 [submodule "subprojects/wlroots"]
 	path = subprojects/wlroots
-	url = git@github.com:revytechinc/wlroots.git
+	url = https://github.com/revytechinc/wlroots.git
 [submodule "subprojects/wf-utils"]
 	path = subprojects/wf-utils
-	url = git@github.com:revytechinc/wf-utils.git
+	url = https://github.com/revytechinc/wf-utils.git
 [submodule "subprojects/wf-touch"]
 	path = subprojects/wf-touch
-	url = git@github.com:revytechinc/wf-touch.git
+	url = https://github.com/revytechinc/wf-touch.git
 [submodule "subprojects/wf-json"]
 	path = subprojects/wf-json
-	url = git@github.com:revytechinc/wf-json.git
+	url = https://github.com/revytechinc/wf-json.git
