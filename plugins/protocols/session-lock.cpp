@@ -13,6 +13,10 @@
 #include <wayfire/nonstd/wlroots-full.hpp>
 #include <wayfire/plugins/common/simple-text-node.hpp>
 #include <wayfire/util/log.hpp>
+#include "src/core/logger.hpp"
+
+// Define component for structured logging
+#define COMPONENT "session-lock"
 
 class lock_surface_keyboard_interaction : public wf::keyboard_interaction_t
 {
@@ -131,6 +135,8 @@ class lock_surface_node : public lock_base_node<wf::scene::floating_inner_node_t
         this->interaction = std::make_unique<wf::keyboard_interaction_t>();
         const char *name = (this->output && this->output->handle) ? this->output->handle->name : "(deleted)";
         LOGC(LSHELL, "lock_surface on ", name, " destroyed");
+        WF_LOG_EVT(wf::log::LOG_LEVEL_DEBUG, "session_lock_surface_destroyed",
+            "lock_surface destroyed, pointer focus cleared", "output=", name);
     }
 
     wf::keyboard_interaction_t& keyboard_interaction() override
@@ -536,12 +542,20 @@ class wf_session_lock_plugin : public wf::plugin_interface_t
             // If a previous lock is in zombie state, delete it, so it stops listening for output
             // changes, removes lock_crashed_nodes, etc.
             prev_lock.reset();
+            WF_LOG_EVT(wf::log::LOG_LEVEL_INFO, "session_locked",
+                "session locked, outputs inhibited");
             break;
 
           case DESTROYED:
             // Session lock client terminated after unlocking.
             cur_lock.reset();
             wf::get_core().seat->refocus();
+            // Restore pointer focus: the seat's refocus only updates keyboard focus.
+            // Pointer focus needs to be updated explicitly by repositioning the cursor,
+            // otherwise the pointer remains unresponsive until the next cursor motion.
+            wf::get_core().seat->update_pointer_position();
+            WF_LOG_EVT(wf::log::LOG_LEVEL_INFO, "session_unlocked",
+                "session unlocked, pointer and keyboard focus restored");
             break;
 
           case ZOMBIE:
@@ -549,6 +563,8 @@ class wf_session_lock_plugin : public wf::plugin_interface_t
             // Keep session locked, but remember previous lock so that if a new client connects and
             // then unlocks, crashed nodes are removed, outputs are un-inhibited, etc.
             LOGC(LSHELL, "session_lock_manager destroyed");
+            WF_LOG_EVT(wf::log::LOG_LEVEL_WARN, "session_lock_crashed",
+                "session lock client crashed, showing crash overlay");
             prev_lock = std::move(cur_lock);
             break;
         }

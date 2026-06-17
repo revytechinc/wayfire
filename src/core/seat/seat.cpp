@@ -226,6 +226,11 @@ void wf::seat_t::clear_pointer_focus()
     priv->lpointer->update_cursor_focus(nullptr);
 }
 
+void wf::seat_t::update_pointer_position()
+{
+    priv->lpointer->update_cursor_position(get_current_time());
+}
+
 uint32_t wf::seat_t::get_keyboard_modifiers()
 {
     return priv->get_modifiers();

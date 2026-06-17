@@ -119,6 +119,13 @@ class seat_t
     void clear_pointer_focus();
 
     /**
+     * Update pointer focus by finding the node at the current cursor position
+     * and setting it as the new focus. Use this after clearing pointer focus
+     * to restore pointer functionality without requiring cursor movement.
+     */
+    void update_pointer_position();
+
+    /**
      * Focus the given output. The currently focused output is used to determine
      * which plugins receive various events (including bindings)
      */
