@@ -13,10 +13,7 @@
 
 #include <wayland-server.h>
 
-/* FreeBSD: detect render-node GPU for hybrid-GPU compatibility */
-#if defined(__FreeBSD__)
-#include <linux/drm-detect.h>
-#endif
+#include <wayfire/platform-backend.hpp>
 
 #include "core/opengl-priv.hpp"
 #include "wayfire/config-backend.hpp"
@@ -57,24 +54,11 @@ static void print_help()
     exit(0);
 }
 
-static bool drop_permissions(void)
+static bool drop_permissions(wf::platform_backend_t& platform)
 {
-    if ((getuid() != geteuid()) || (getgid() != getegid()))
+    if (!platform.drop_permissions())
     {
-        // Set the gid and uid in the correct order.
-        if ((setgid(getgid()) != 0) || (setuid(getuid()) != 0))
-        {
-            LOGE("Unable to drop root, refusing to start");
-
-            return false;
-        }
-    }
-
-    if ((setgid(0) != -1) || (setuid(0) != -1))
-    {
-        LOGE("Unable to drop root (we shouldn't be able to "
-             "restore it after setuid), refusing to start");
-
+        LOGE("Unable to drop root, refusing to start");
         return false;
     }
 
@@ -429,15 +413,19 @@ int main(int argc, char *argv[])
     core.display = display;
     core.ev_loop = wl_display_get_event_loop(core.display);
 
-    /* FreeBSD: if only one GPU has a render node, restrict wlroots to it.
-     * This avoids multi-GPU DMA buffer sharing failures on hybrid-graphics
-     * laptops (e.g. Intel iGPU + NVIDIA dGPU). */
+    /* Create platform-specific backend for OS abstractions */
+    auto platform = wf::create_platform_backend();
+    LOGD("Platform: ", platform->platform_name());
+
+    /* Detect GPU for hybrid-graphics systems.
+     * On systems with multiple GPUs, this detects which GPU has usable
+     * render nodes and can be used for rendering. */
     if (!getenv("WLR_DRM_DEVICES"))
     {
-        char *gpu_path = wf_freebsd_detect_render_gpu();
+        char *gpu_path = platform->detect_render_gpu();
         if (gpu_path && gpu_path[0] != '\0')
         {
-            LOGD("FreeBSD: restricting to GPU with render node: ", gpu_path);
+            LOGD("Restricting to GPU with render node: ", gpu_path);
             setenv("WLR_DRM_DEVICES", gpu_path, 0);
         }
         free(gpu_path);
@@ -504,7 +492,7 @@ int main(int argc, char *argv[])
         assert(core.egl);
     }
 
-    if (!allow_root && !drop_permissions())
+    if (!allow_root && !drop_permissions(*platform))
     {
         wl_display_destroy_clients(core.display);
         wl_display_destroy(core.display);

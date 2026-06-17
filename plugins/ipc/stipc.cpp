@@ -18,6 +18,7 @@
 #include <wayfire/touch/touch.hpp>
 
 extern "C" {
+#include <linux/input-event-codes.h>
 #include <wlr/backend/wayland.h>
 #include <wlr/backend/multi.h>
 #include <wlr/backend/headless.h>

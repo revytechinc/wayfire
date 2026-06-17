@@ -66,10 +66,8 @@ wayfire_sources = ['geometry.cpp',
                    'output/workspace-impl.cpp',
                    'core/logger.cpp']
 
-# FreeBSD-specific: detect GPUs with render nodes to avoid hybrid-GPU issues
-if host_machine.system() == 'freebsd'
-  wayfire_sources += 'compat/drm-detect-freebsd.cpp'
-endif
+# Platform backend factory (includes platform implementations)
+wayfire_sources += ['platform/platform-factory.cpp']
 
 json_flags = json.partial_dependency(compile_args: true, includes: true, link_args: true)
 wayfire_dependencies = [wayland_server, wlroots, xkbcommon, libinput,
